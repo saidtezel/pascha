@@ -40,29 +40,20 @@ wget -O /boot/config/plugins/dockerMan/templates-user/my-pascha.xml \
 ```
 
 Then Docker tab, Add Container, pick `pascha` from the Template
-drop-down, fill in the Famly and Immich fields, and Apply. The
-container runs one fetch and stops; check its log for the result.
+drop-down, fill in the Famly and Immich fields, and Apply.
+
+The container keeps running: it fetches once at start, then again
+every **Fetch interval** (`PASCHA_INTERVAL`, default `6h`, minimum
+`15m`), measured from the start of the previous fetch. A failed fetch
+(Famly or Immich unreachable, an upload rejected) is logged and
+retried at the next interval; open the container's log to see each
+run's result and the time of the next one. Keep the interval set: the
+template restarts the container whenever it exits, so without one it
+would fetch back to back.
 
 For the first run, set Post Arguments to `fetch --max-pages 0` to
-backfill the whole feed, then set it back to `fetch`.
-
-## 3. Schedule it
-
-pascha exits after each fetch, so re-run it on a schedule with the
-User Scripts plugin (Community Applications, "User Scripts"):
-
-1. Settings, User Scripts, Add New Script, name it `pascha`.
-2. Edit the script:
-
-   ```bash
-   #!/bin/bash
-   docker start -a pascha
-   ```
-
-3. Set the schedule to Custom, e.g. `0 */6 * * *` for every six hours.
-
-`docker start` re-runs the container with the settings from the
-template, and `-a` puts the fetch output in the User Scripts log.
+backfill the whole feed, then set it back to `fetch` so each interval
+only reads the newest pages.
 
 ## Updating
 

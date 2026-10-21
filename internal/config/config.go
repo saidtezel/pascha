@@ -4,7 +4,9 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
+	"time"
 
 	"github.com/saidtezel/pascha/api/famly"
 )
@@ -40,6 +42,11 @@ type Config struct {
 
 	// LogFormat is "json" (cron-friendly) or "text" (interactive).
 	LogFormat string
+
+	// Interval, when non-zero, keeps fetch running and starts a new
+	// fetch this long after the previous one began (PASCHA_INTERVAL,
+	// a Go duration such as "6h"). Zero means fetch once and exit.
+	Interval time.Duration
 }
 
 // Load reads config from environment variables, applying defaults
@@ -64,6 +71,13 @@ func Load() (*Config, error) {
 	}
 	if c.LogFormat == "" {
 		c.LogFormat = "json"
+	}
+	if v := os.Getenv("PASCHA_INTERVAL"); v != "" {
+		d, err := time.ParseDuration(v)
+		if err != nil {
+			return nil, fmt.Errorf("PASCHA_INTERVAL: %w", err)
+		}
+		c.Interval = d
 	}
 	return c, nil
 }

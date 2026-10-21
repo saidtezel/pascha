@@ -97,7 +97,12 @@ func runFetch(ctx context.Context, cfg *config.Config, logger *slog.Logger, args
 	source := fs.String("source", "all", "feed filter: all (every image and video), tagged (only images tagged with one of our children), or liked (only images liked by a household login)")
 	filenamePat := fs.String("filename-pattern", "", "template for the file name Immich stores (default: "+sink.DefaultFilenamePattern+")")
 	includeSystem := fs.Bool("include-system-posts", false, "include automated Famly posts (check-ins, sign-outs); off by default to keep templated text out of photo captions")
+	interval := fs.Duration("interval", cfg.Interval, "keep running and fetch again this often, e.g. 6h (default: PASCHA_INTERVAL; 0 = fetch once and exit)")
 	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if *interval != 0 && *interval < minInterval {
+		fmt.Fprintf(os.Stderr, "fetch: interval %s is shorter than the %s minimum\n", interval, minInterval)
 		return 2
 	}
 
@@ -130,66 +135,76 @@ func runFetch(ctx context.Context, cfg *config.Config, logger *slog.Logger, args
 
 	tokenSrc := buildTokenSource(cfg)
 	fc := famly.New(tokenSrc, famlyOpts(cfg)...)
-	logins := map[string]struct{}{}
-	children := map[string]struct{}{}
-	if src == sync.SourceTagged || src == sync.SourceLiked {
-		me, err := fc.Me(ctx)
-		if err != nil {
-			logger.Error("fetch /me", "err", err)
-			return 1
-		}
-		logins[me.LoginID] = struct{}{}
-		for _, r := range me.Roles2 {
-			children[r.TargetID] = struct{}{}
-			rels, err := fc.Relations(ctx, r.TargetID)
+	// fetchOnce resolves the household and runs one sync. It is
+	// re-run on every tick in interval mode, so household changes
+	// are picked up without a restart.
+	fetchOnce := func(ctx context.Context) int {
+		logins := map[string]struct{}{}
+		children := map[string]struct{}{}
+		if src == sync.SourceTagged || src == sync.SourceLiked {
+			me, err := fc.Me(ctx)
 			if err != nil {
-				logger.Warn("fetch /relations", "child", r.TargetID, "err", err)
-				continue
+				logger.Error("fetch /me", "err", err)
+				return 1
 			}
-			for _, rel := range rels {
-				if rel.LoginID != "" {
-					logins[rel.LoginID] = struct{}{}
+			logins[me.LoginID] = struct{}{}
+			for _, r := range me.Roles2 {
+				children[r.TargetID] = struct{}{}
+				rels, err := fc.Relations(ctx, r.TargetID)
+				if err != nil {
+					logger.Warn("fetch /relations", "child", r.TargetID, "err", err)
+					continue
+				}
+				for _, rel := range rels {
+					if rel.LoginID != "" {
+						logins[rel.LoginID] = struct{}{}
+					}
 				}
 			}
+			// Trap A: a token that mints fine but resolves to no
+			// children/logins makes shouldDownloadImage return false for
+			// every image; the run would walk pages and save nothing
+			// silently. Fail loudly with a hint at the most likely cause.
+			if src == sync.SourceTagged && len(children) == 0 {
+				fmt.Fprintln(os.Stderr, "fetch: --source=tagged but no household children visible. Verify the token belongs to an enrolled caregiver (run \"pascha login\" to see Roles2).")
+				return 2
+			}
+			if src == sync.SourceLiked && len(logins) == 0 {
+				fmt.Fprintln(os.Stderr, "fetch: --source=liked but no household logins resolved. Verify the token's /me response includes a loginId and at least one Relation.")
+				return 2
+			}
 		}
-		// Trap A: a token that mints fine but resolves to no
-		// children/logins makes shouldDownloadImage return false for
-		// every image; the run would walk pages and save nothing
-		// silently. Fail loudly with a hint at the most likely cause.
-		if src == sync.SourceTagged && len(children) == 0 {
-			fmt.Fprintln(os.Stderr, "fetch: --source=tagged but no household children visible. Verify the token belongs to an enrolled caregiver (run \"pascha login\" to see Roles2).")
-			return 2
-		}
-		if src == sync.SourceLiked && len(logins) == 0 {
-			fmt.Fprintln(os.Stderr, "fetch: --source=liked but no household logins resolved. Verify the token's /me response includes a loginId and at least one Relation.")
-			return 2
-		}
-	}
 
-	res, err := sync.Run(ctx, sync.Deps{
-		Famly: fc, Immich: immichSink, Logger: logger,
-	}, sync.Options{
-		MaxPages:           *maxPages,
-		DryRun:             *dryRun,
-		Source:             src,
-		Zone:               zone,
-		HouseholdLogins:    logins,
-		HouseholdChildren:  children,
-		Software:           software(Version),
-		IncludeSystemPosts: *includeSystem,
-	})
-	if err != nil {
-		logger.Error("fetch", "err", err)
-		return 1
+		res, err := sync.Run(ctx, sync.Deps{
+			Famly: fc, Immich: immichSink, Logger: logger,
+		}, sync.Options{
+			MaxPages:           *maxPages,
+			DryRun:             *dryRun,
+			Source:             src,
+			Zone:               zone,
+			HouseholdLogins:    logins,
+			HouseholdChildren:  children,
+			Software:           software(Version),
+			IncludeSystemPosts: *includeSystem,
+		})
+		if err != nil {
+			logger.Error("fetch", "err", err)
+			return 1
+		}
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		_ = enc.Encode(res)
+		if res.UploadFailed > 0 {
+			fmt.Fprintf(os.Stderr, "fetch: %d asset(s) not uploaded to Immich; rerun to retry\n", res.UploadFailed)
+			return 1
+		}
+		return 0
 	}
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "  ")
-	_ = enc.Encode(res)
-	if res.UploadFailed > 0 {
-		fmt.Fprintf(os.Stderr, "fetch: %d asset(s) not uploaded to Immich; rerun to retry\n", res.UploadFailed)
-		return 1
+	if *interval == 0 {
+		return fetchOnce(ctx)
 	}
-	return 0
+	logger.Info("fetching on an interval", "every", interval.String())
+	return runEvery(ctx, logger, *interval, fetchOnce)
 }
 
 // runDrift hits the endpoints in a TOML manifest, computes

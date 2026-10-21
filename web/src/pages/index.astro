@@ -190,7 +190,9 @@ import SectionLabel from '@dunn.dev/reference/chrome/SectionLabel.astro';
           GitHub Container Registry. Best for cron on a homelab box
           where you don't want Go or a loose binary on disk. No volume
           needed: pascha keeps no state. Pass the Famly credentials and
-          the Immich URL and API key as env vars at run-time.
+          the Immich URL and API key as env vars, and set
+          <code>PASCHA_INTERVAL=6h</code> to keep it running as a
+          service that fetches on that interval.
         </p>
         <p class="tile-meta">linux/amd64 · linux/arm64 · rootless-ok</p>
       </div>

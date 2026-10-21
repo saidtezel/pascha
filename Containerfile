@@ -8,11 +8,18 @@
 # Build locally:
 #   docker build -f Containerfile -t pascha .
 #
-# Run:
+# Run once:
 #   docker run --rm \
 #     -e FAMLY_EMAIL -e FAMLY_PASSWORD \
 #     -e IMMICH_BASE_URL -e IMMICH_API_KEY \
 #     ghcr.io/saidtezel/pascha:latest fetch --max-pages 1
+#
+# Run as a service that fetches every PASCHA_INTERVAL (min 15m):
+#   docker run -d --name pascha --restart unless-stopped \
+#     -e FAMLY_EMAIL -e FAMLY_PASSWORD \
+#     -e IMMICH_BASE_URL -e IMMICH_API_KEY \
+#     -e PASCHA_INTERVAL=6h \
+#     ghcr.io/saidtezel/pascha:latest
 
 FROM --platform=$BUILDPLATFORM golang:1.26 AS build
 
