@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>pascha</Name>
+  <Repository>ghcr.io/saidtezel/pascha:main</Repository>
+  <Registry>https://github.com/saidtezel/pascha/pkgs/container/pascha</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/saidtezel/pascha/issues</Support>
+  <Project>https://github.com/saidtezel/pascha</Project>
+  <Overview>Copies the photos and videos your daycare posts on Famly into Immich, with dates and captions written into the files. pascha keeps no state and needs no volume: Immich is the record of what has been uploaded, so re-runs skip what is already there.&#xD;
+&#xD;
+The container runs one fetch and exits. Schedule re-runs with the User Scripts plugin (a script running "docker start pascha" on a cron such as 0 */6 * * *); see unraid/README.md in the project repository.&#xD;
+&#xD;
+Post Arguments take the fetch flags, e.g. "fetch --max-pages 0" for a full backfill on the first run, or "fetch --source tagged" for only images tagged with your children.</Overview>
+  <Category>Backup: MediaApp:Photos</Category>
+  <WebUI/>
+  <TemplateURL>https://raw.githubusercontent.com/saidtezel/pascha/main/unraid/pascha.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/saidtezel/pascha/main/unraid/pascha.png</Icon>
+  <ExtraParams>--restart=no</ExtraParams>
+  <PostArgs>fetch</PostArgs>
+  <CPUset/>
+  <DonateText/>
+  <DonateLink/>
+  <Requirement>A running Immich server and an Immich API key with asset upload permission.</Requirement>
+  <Config Name="Famly email" Target="FAMLY_EMAIL" Default="" Mode="" Description="Email address of your Famly parent login." Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="Famly password" Target="FAMLY_PASSWORD" Default="" Mode="" Description="Password of your Famly parent login." Type="Variable" Display="always" Required="true" Mask="true"></Config>
+  <Config Name="Immich API URL" Target="IMMICH_BASE_URL" Default="http://192.168.1.10:2283/api" Mode="" Description="Immich API root, ending in /api. For Immich on this server use http://[UNRAID-IP]:[IMMICH-PORT]/api." Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="Immich API key" Target="IMMICH_API_KEY" Default="" Mode="" Description="Create one in Immich under Account Settings, API Keys." Type="Variable" Display="always" Required="true" Mask="true"></Config>
+  <Config Name="Famly device ID" Target="FAMLY_DEVICE_ID" Default="" Mode="" Description="Optional but recommended: a fixed UUID (e.g. from 'cat /proc/sys/kernel/random/uuid'), so Famly sees the same device when the container is recreated." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Fallback time zone" Target="PASCHA_TZ" Default="" Mode="" Description="IANA zone (e.g. Europe/London) for videos in posts with no zoned image. Empty uses the server's time zone." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Log format" Target="PASCHA_LOG_FORMAT" Default="text" Mode="" Description="text (readable in the Unraid log viewer) or json." Type="Variable" Display="advanced" Required="false" Mask="false">text</Config>
+</Container>
