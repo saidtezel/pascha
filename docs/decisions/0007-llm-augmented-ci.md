@@ -2,6 +2,12 @@
 
 **Status**: accepted, 2026-05-07
 
+> **Update, 2026-10-21**: pascha's CI moved from GitLab to GitHub
+> Actions. The GitLab component catalog described below is no longer
+> used; the tag and weekly drift gate now lives in
+> `.github/workflows/drift.yml`. The rest of this record is kept as
+> written.
+
 ## Context
 
 pascha depends on a vendor surface (Famly) that we don't control.

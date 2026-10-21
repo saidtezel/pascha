@@ -29,19 +29,19 @@ per endpoint, an exception to the default operator-only posture for
 
 ## CI
 
-`drift-gate` in `.gitlab-ci.yml` runs
-`pascha drift --anonymize --diff discovery/baselines/main` on every tag
-and on the weekly schedule on main: two GETs, one second apart, on the
-operator's own account (ADR 0007). A scheduled pipeline runs this job
-and nothing else, so a failure email means Famly drifted or login broke.
-The fresh shapes are kept for a week as the job artifact
-`discovery/baselines/current/`, visible to developers only.
+`drift-gate` in `.github/workflows/drift.yml` runs
+`pascha drift --anonymize --diff discovery/baselines/main` on every tag,
+weekly, and on demand from the Actions tab: two GETs, one second apart,
+on the operator's own account (ADR 0007). It needs the `FAMLY_EMAIL`
+and `FAMLY_PASSWORD` repository secrets; a failure email means Famly
+drifted or login broke. The fresh shapes are kept for a week as the
+run artifact `drift-shapes`.
 
 ## Seeding
 
 Reseed whenever the walk changes what a shape holds (the first seed
 after deeper shapes landed, or a new manifest endpoint). Run the
-schedule, download the artifact, check every key is a json tag of a pascha
+workflow, download the artifact, check every key is a json tag of a pascha
 struct and every value is a type name, `<empty>`, `<n=*>`, `<object>` or
 `<array>`, and copy the files here. Prefer a week whose
 first posts include an image, a tagged image and a video, so those

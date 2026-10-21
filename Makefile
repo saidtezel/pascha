@@ -1,7 +1,7 @@
 .PHONY: build build-linux build-darwin build-all test smoke lint clean tidy gen gen-famly refresh-immich-validator smoke-immich pre-tag-check
 
 # The Immich release pascha is verified against via `make pre-tag-check`.
-# Renovate tracks it (automerge off). A bump MR means: upgrade the
+# Renovate tracks it (automerge off). A bump PR means: upgrade the
 # home Immich to the new release, recapture api/immich/required-fields.json
 # with `make refresh-immich-validator`, then run `make pre-tag-check`.
 # renovate: datasource=github-releases depName=immich-app/immich

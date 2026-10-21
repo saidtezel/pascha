@@ -1,0 +1,46 @@
+# Drift gate. Builds pascha, logs in with the FAMLY_EMAIL and
+# FAMLY_PASSWORD repository secrets, reads the manifest's endpoints
+# from the operator's own account, and diffs response shapes against
+# the committed baseline at discovery/baselines/main/. Exit 1 means
+# the shape changed, exit 2 means login or transport failed; either
+# fails the run, and GitHub emails the workflow's owner.
+#
+# Fires on every v* tag, weekly, and by hand. See
+# discovery/baselines/main/README.md and
+# docs/decisions/0007-llm-augmented-ci.md for the posture.
+#
+# The fresh shapes are kept as an artifact so the baseline can be
+# reseeded without local credentials: they carry type names and <n=*>
+# only, the same content as the committed baseline.
+name: drift
+
+on:
+  push:
+    tags: ["v*"]
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift-gate:
+    runs-on: ubuntu-latest
+    env:
+      FAMLY_EMAIL: ${{ secrets.FAMLY_EMAIL }}
+      FAMLY_PASSWORD: ${{ secrets.FAMLY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go build -o bin/pascha ./cmd/pascha
+      - run: bin/pascha drift --anonymize --manifest discovery/probe/manifest.toml --diff discovery/baselines/main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: drift-shapes
+          path: discovery/baselines/current/
+          retention-days: 7
+          if-no-files-found: ignore

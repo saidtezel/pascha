@@ -1,32 +1,40 @@
-# Thin runtime layer for pascha. Pairs with the v2.0.0 catalog's
-# container-image template in `from_artifacts: true` mode: the
-# go-release-binary job builds + cosign-signs the binary, this
-# Containerfile COPYs it onto ci-runtime-go (UBI micro). The
-# binary verifiable via `cosign verify-blob` is byte-for-byte the
-# binary inside the container.
+# Self-contained, multi-arch image for pascha. Built and pushed to
+# ghcr.io/saidtezel/pascha by .github/workflows/image.yml.
 #
-# No Go toolchain stage. No recompile. Provable parity.
+# The builder stage runs on the host's native platform and
+# cross-compiles for TARGETOS/TARGETARCH (set by buildx), so no
+# emulation is needed to produce the arm64 image.
 #
-# Multi-arch: TARGETARCH is set automatically by the catalog
-# container-image template when multi_arch: true. Defaults to amd64
-# for single-arch builds. arm64 binaries land in dist/ via
-# go-release-binary's parallel:matrix.
-#
-# Build (via catalog, from a tag pipeline):
-#   automatic — go-release-binary -> container-image (from_artifacts)
+# Build locally:
+#   docker build -f Containerfile -t pascha .
 #
 # Run:
 #   docker run --rm \
 #     -e FAMLY_EMAIL -e FAMLY_PASSWORD \
 #     -e IMMICH_BASE_URL -e IMMICH_API_KEY \
-#     registry.gitlab.com/dunn.dev/pascha/cli:latest fetch --max-pages 1
+#     ghcr.io/saidtezel/pascha:latest fetch --max-pages 1
 
-FROM registry.gitlab.com/dunn.dev/pipeline/ci-runtime-go:4.12.0@sha256:b4ba9539e96ca60a259c0b388646072d009eba369ceedf0c9f37b6ce2b6765fe
+FROM --platform=$BUILDPLATFORM golang:1.26 AS build
 
 ARG VERSION=dev
+ARG TARGETOS=linux
 ARG TARGETARCH=amd64
 
-COPY dist/pascha-linux-${TARGETARCH} /pascha
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -trimpath -ldflags "-s -w -X main.Version=${VERSION}" \
+    -o /out/pascha ./cmd/pascha
+
+# distroless/static carries CA certificates, tzdata and a writable
+# /tmp, which is all a static Go binary talking HTTPS needs.
+FROM gcr.io/distroless/static-debian12:nonroot
+
+ARG VERSION=dev
+
+COPY --from=build /out/pascha /pascha
 
 # Stateless: no volume. Media is staged in /tmp per asset and goes
 # straight to Immich; Immich is the record of what is uploaded.

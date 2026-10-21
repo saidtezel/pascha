@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["gitlab>dunn.dev/pipeline:renovate-config"],
+  "extends": ["config:recommended"],
   "customManagers": [
     {
       "customType": "regex",

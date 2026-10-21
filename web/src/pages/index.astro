@@ -165,11 +165,9 @@ import SectionLabel from '@dunn.dev/reference/chrome/SectionLabel.astro';
   <section class="section">
     <SectionLabel label="Install" />
     <p class="section-prose">
-      Three ways to run <code>pascha</code>, in increasing order of
-      isolation from your day-to-day machine. Each release ships
-      cosign-signed binaries, a CycloneDX SBOM per architecture, and
-      a SLSA v1.0 provenance attestation, all verifiable against
-      GitLab's OIDC issuer.
+      Two ways to run <code>pascha</code>: build it with your own Go
+      toolchain, or pull the container image that GitHub Actions
+      builds from every push to main and every release tag.
     </p>
     <div class="tile-grid">
       <div class="tile">
@@ -179,38 +177,22 @@ import SectionLabel from '@dunn.dev/reference/chrome/SectionLabel.astro';
         <p class="tile-prose">
           Build from source against your local Go toolchain. Best
           for contributors and anyone who already runs Go for other
-          work. No signature verification — trust comes from the
-          module proxy.
+          work. Trust comes from the module proxy.
         </p>
-        <p class="tile-meta">go 1.25+ · module-cached</p>
+        <p class="tile-meta">go 1.26+ · module-cached</p>
       </div>
       <div class="tile">
         <p class="tile-eyebrow">option b</p>
-        <h3 class="tile-headline">Prebuilt binary</h3>
-        <pre>curl -L -o pascha https://github.com/saidtezel/pascha/releases/latest/download/pascha-linux-amd64</pre>
-        <p class="tile-prose">
-          Cosign-signed binary from the <a href="https://github.com/saidtezel/pascha/releases">releases page</a>.
-          Pair the download with the matching <code>.sig</code> and
-          verify against the GitLab OIDC issuer before running. The
-          hardened option that doesn't ask you to install a Go
-          toolchain.
-        </p>
-        <p class="tile-meta">linux/amd64 · linux/arm64 · darwin/arm64 · cosign</p>
-      </div>
-      <div class="tile">
-        <p class="tile-eyebrow">option c</p>
         <h3 class="tile-headline">Container image</h3>
-        <pre>podman pull registry.gitlab.com/dunn.dev/pascha/cli:latest</pre>
+        <pre>docker pull ghcr.io/saidtezel/pascha:latest</pre>
         <p class="tile-prose">
-          The OCI image is the prebuilt binary copied into a thin
-          runtime layer — same cosign-signed artifact as option B,
-          byte-for-byte. Best for cron on a homelab box where you
-          don't want Go or a loose binary on disk. The image itself
-          is cosign-signed by digest. No volume needed: pascha keeps no
-          state. Pass the Immich URL and API key as env vars at
-          run-time.
+          A static binary on a distroless base, published to the
+          GitHub Container Registry. Best for cron on a homelab box
+          where you don't want Go or a loose binary on disk. No volume
+          needed: pascha keeps no state. Pass the Famly credentials and
+          the Immich URL and API key as env vars at run-time.
         </p>
-        <p class="tile-meta">oci · cosign-signed-by-digest · rootless-ok</p>
+        <p class="tile-meta">linux/amd64 · linux/arm64 · rootless-ok</p>
       </div>
     </div>
   </section>
