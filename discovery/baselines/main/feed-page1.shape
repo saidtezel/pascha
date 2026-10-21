@@ -1,0 +1,47 @@
+{
+  "feedItems": [
+    {
+      "body": "str",
+      "createdDate": "str",
+      "feedItemId": "str",
+      "images": [
+        {
+          "createdAt": {
+            "date": "str",
+            "timezone": "str"
+          },
+          "expiration": "str",
+          "height": "int",
+          "imageId": "str",
+          "liked": "bool",
+          "likes": [
+            {
+              "loginId": "str"
+            },
+            "\u003cn=*\u003e"
+          ],
+          "tags": [
+            "\u003cempty\u003e"
+          ],
+          "url": "str",
+          "url_big": "str",
+          "width": "int"
+        },
+        "\u003cn=*\u003e"
+      ],
+      "originatorId": "str",
+      "richTextBody": "str",
+      "sender": {
+        "id": "str",
+        "loginId": "str",
+        "name": "str",
+        "subtitle": "str"
+      },
+      "systemPostTypeClass": "str",
+      "videos": [
+        "\u003cempty\u003e"
+      ]
+    },
+    "\u003cn=*\u003e"
+  ]
+}

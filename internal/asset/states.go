@@ -1,0 +1,245 @@
+// Package asset is the typestate-encoded lifecycle for a single
+// piece of media moving from the vendor's surface into Immich.
+//
+// Phases are distinct Go types: Discovered, Downloaded, Prepared,
+// Uploaded. The only path between them is the
+// transition method on the source phase, and each transition
+// returns a value of the next phase. Skipping a phase is a
+// compile error.
+//
+// The original ADR 0002 split EXIF reinjection into its own
+// ExifFixed phase, and later folded it into a Save-to-disk phase.
+// pascha keeps no local archive (ADR 0008): Prepare reinjects EXIF
+// into the downloaded temp file and builds the video sidecar, and
+// Upload sends the result to Immich. Prepared therefore implies
+// "EXIF reinjection attempted"; ExifError says whether it succeeded.
+// Uploaded is terminal: pascha keeps no state file (ADR 0009), and
+// Immich holding the asset is the record that it is done.
+package asset
+
+import (
+	"time"
+
+	"github.com/saidtezel/pascha/api/famly"
+	"github.com/saidtezel/pascha/internal/exif"
+)
+
+// Source identifies which vendor surface produced an asset.
+type Source string
+
+const (
+	SourceFeedImage Source = "feed-image"
+	SourceFeedVideo Source = "feed-video"
+)
+
+// Discovered is the first phase: an asset known by ID but not yet
+// fetched. Holds metadata pascha will need downstream (filename,
+// timestamps, caption, sender, per-image tags) plus the
+// short-lived signed URL.
+type Discovered struct {
+	famlyImageID  string
+	source        Source
+	feedItemID    string
+	url           string
+	filename      string
+	fileCreatedAt time.Time
+	tzOffset      string
+	body          string
+	senderName    string
+	tagNames      []string
+}
+
+func (d Discovered) FamlyImageID() string     { return d.famlyImageID }
+func (d Discovered) Source() Source           { return d.source }
+func (d Discovered) FeedItemID() string       { return d.feedItemID }
+func (d Discovered) URL() string              { return d.url }
+func (d Discovered) Filename() string         { return d.filename }
+func (d Discovered) FileCreatedAt() time.Time { return d.fileCreatedAt }
+func (d Discovered) Body() string             { return d.body }
+func (d Discovered) SenderName() string       { return d.senderName }
+
+// EXIF returns the bundle of metadata pascha knows about this
+// asset, ready to embed at Prepare time.
+//
+// Body text is sanitized for EXIF (newlines/control chars
+// collapsed to spaces) so downstream metadata browsers display
+// the description as a single entry rather than splitting on
+// embedded newlines. The unsanitized body remains in
+// Discovered.body for callers that want it (e.g. a future XMP
+// description that supports paragraph structure).
+func (d Discovered) EXIF(software string) exif.Fields {
+	flatBody := exif.SanitizeText(d.body)
+	flatSender := exif.SanitizeText(d.senderName)
+
+	combined := flatBody
+	if flatSender != "" {
+		if combined != "" {
+			combined = combined + " - " + flatSender
+		} else {
+			combined = flatSender
+		}
+	}
+	offset := d.tzOffset
+	if offset == "" {
+		offset = "+00:00"
+	}
+	return exif.Fields{
+		DateTimeOriginal:   d.fileCreatedAt,
+		OffsetTimeOriginal: offset,
+		ImageDescription:   flatBody,
+		UserComment:        combined,
+		Artist:             flatSender,
+		Software:           software,
+		// XMP gets the unflattened body; XMP descriptions can
+		// safely carry newlines and Unicode without breaking
+		// downstream readers (dc:description is a structured
+		// alt-language array).
+		XMPDescription: d.body,
+		XMPKeywords:    d.tagNames,
+	}
+}
+
+// Sidecar returns the standalone XMP packet for a video, or nil for
+// any other asset: photos embed their XMP, and a sidecar date would
+// override the timezone embedded in the file.
+func (d Discovered) Sidecar(software string) ([]byte, error) {
+	if d.source != SourceFeedVideo {
+		return nil, nil
+	}
+	return exif.Sidecar(d.EXIF(software))
+}
+
+// DiscoverImage constructs a Discovered from a feed image and its
+// parent post. zone dates an image that carries no zone of its own;
+// nil means time.Local.
+func DiscoverImage(img famly.Image, item famly.FeedItem, zone *time.Location) Discovered {
+	at := pickImageTime(img, item)
+	tags := make([]string, 0, len(img.Tags))
+	for _, t := range img.Tags {
+		if t.Name != "" {
+			tags = append(tags, t.Name)
+		}
+	}
+	return Discovered{
+		famlyImageID:  img.ImageID,
+		source:        SourceFeedImage,
+		feedItemID:    item.FeedItemID,
+		url:           img.BestURL(),
+		filename:      img.ImageID + ".jpg", // initial; Prepare may rewrite the extension from Content-Type
+		fileCreatedAt: at,
+		tzOffset:      imageOffset(img, at, zone),
+		body:          pickBody(item),
+		senderName:    item.SenderName(),
+		tagNames:      tags,
+	}
+}
+
+// DiscoverVideo constructs a Discovered from a feed video and its
+// parent post. zone is the fallback for a post with no zoned image;
+// nil means time.Local.
+func DiscoverVideo(vid famly.Video, item famly.FeedItem, zone *time.Location) Discovered {
+	return Discovered{
+		famlyImageID:  vid.VideoID,
+		source:        SourceFeedVideo,
+		feedItemID:    item.FeedItemID,
+		url:           vid.URL,
+		filename:      vid.VideoID + ".mp4",
+		fileCreatedAt: item.CreatedDate.Time,
+		tzOffset:      videoOffset(item, zone),
+		body:          pickBody(item),
+		senderName:    item.SenderName(),
+	}
+}
+
+// Downloaded is the post-fetch phase: the bytes are on disk in a
+// temp file. SHA1 is computed. ContentType captures the actual
+// mime type as the CDN reported it.
+type Downloaded struct {
+	d           Discovered
+	tempPath    string
+	sha1        string
+	size        int64
+	contentType string
+}
+
+func (dl Downloaded) Discovered() Discovered { return dl.d }
+func (dl Downloaded) TempPath() string       { return dl.tempPath }
+func (dl Downloaded) SHA1() string           { return dl.sha1 }
+func (dl Downloaded) Size() int64            { return dl.size }
+func (dl Downloaded) ContentType() string    { return dl.contentType }
+
+// Prepared is the post-EXIF phase: the temp file carries the
+// reinjected metadata and the video sidecar is built. EXIF
+// reinjection has been attempted (success recorded in ExifError
+// empty / non-empty).
+type Prepared struct {
+	dl        Downloaded
+	filename  string
+	exifError string
+	sidecar   []byte // video XMP packet, sent with the upload
+}
+
+func (p Prepared) Downloaded() Downloaded { return p.dl }
+func (p Prepared) Filename() string       { return p.filename }
+func (p Prepared) ExifError() string      { return p.exifError }
+
+// Uploaded is the terminal phase: Immich holds the asset.
+type Uploaded struct {
+	prepared Prepared
+	immichID string
+	status   string
+}
+
+func (u Uploaded) Prepared() Prepared    { return u.prepared }
+func (u Uploaded) ImmichAssetID() string { return u.immichID }
+func (u Uploaded) ImmichStatus() string  { return u.status }
+
+// videoOffset is the offset for a video's sidecar date. A video
+// carries no zone of its own, so it borrows the zone of a sibling
+// image in the same post, evaluated at the post date; a post with
+// no zoned image gets zone's offset at the post date. A nil zone
+// means time.Local.
+func videoOffset(item famly.FeedItem, zone *time.Location) string {
+	for _, img := range item.Images {
+		if img.CreatedAt.Zoned() {
+			return img.CreatedAt.OffsetAt(item.CreatedDate.Time)
+		}
+	}
+	if zone == nil {
+		zone = time.Local
+	}
+	return famly.FormatOffset(item.CreatedDate.In(zone))
+}
+
+// imageOffset is the offset for an image's EXIF date: its own zone
+// when Famly named one, else zone's offset at the image time
+// (Famly's "UTC" label counts as no zone; see ImageTime.Zoned).
+func imageOffset(img famly.Image, at time.Time, zone *time.Location) string {
+	if img.CreatedAt.Zoned() {
+		return img.CreatedAt.OffsetAt(at)
+	}
+	if zone == nil {
+		zone = time.Local
+	}
+	return famly.FormatOffset(at.In(zone))
+}
+
+// pickImageTime selects the most-trusted timestamp for an image:
+// the image's own CreatedAt if populated, otherwise the parent
+// post's CreatedDate.
+func pickImageTime(img famly.Image, item famly.FeedItem) time.Time {
+	if !img.CreatedAt.Date.IsZero() {
+		return img.CreatedAt.Date.Time
+	}
+	return item.CreatedDate.Time
+}
+
+// pickBody returns the plain-text post body suitable for flat
+// EXIF text fields. richTextBody is HTML-formatted and would land
+// "<p>...</p>" and "&#34;" artifacts in EXIF; it stays out of
+// here. When XMP lands we may consider richTextBody for a
+// formatted variant, but XMP-dc:description prefers plain text
+// too.
+func pickBody(item famly.FeedItem) string {
+	return item.Body
+}

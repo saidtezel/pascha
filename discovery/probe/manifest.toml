@@ -1,0 +1,66 @@
+# pascha's drift manifest. Lists ONLY the read-side endpoints pascha
+# issues during a normal fetch that can be probed without
+# operator-private context:
+#
+#   - /api/me/me/me      auth + identity check
+#   - /api/feed/feed/feed first page of the parent feed
+#
+# Each endpoint id below is bound to a Go struct in
+# cmd/pascha/drift_schemas.go. Before computing a shape signature, the
+# probe filters the response to the keys that struct decodes (via its
+# json tags). Vendor-side fields pascha ignores at decode time are not
+# carried into the committed baseline. The drift signal is therefore
+# scoped to "fields pascha's typed clients actually read"; a Famly
+# field pascha does not consume can change shape without firing the
+# gate. This is intentional: drift gates a release, and a release is
+# only put at risk by a change to a field pascha decodes.
+#
+# Endpoints with no struct binding receive the full vendor shape.
+# That is the right default for ad-hoc operator endpoints in
+# manifest.local.toml; it is the wrong default for the committed
+# manifest, where every endpoint should have a binding.
+#
+# /api/v2/relations is intentionally absent: it requires a
+# ?childId=<id> query param, which is operator-private context
+# we don't want in a committed manifest. The Relation response
+# shape is still exercised on every real fetch through pascha's
+# typed unmarshal in api/famly/me.go; if Famly changes that
+# shape, fetch surfaces it.
+#
+# This manifest is intentionally NOT exhaustive of Famly's
+# parent-side API. Surveying surface pascha does not integrate
+# against would not be in scope: pascha is a household photo
+# archive, not a vendor API monitor.
+#
+# This manifest is committed as documentation of the integration
+# boundary. Running it, seeding the baseline and the CI schedule are
+# covered in discovery/baselines/main/README.md.
+#
+# pascha drift uses the same token resolution as pascha fetch:
+# email+password are preferred (refreshing) and the auth_env value
+# below is used only as a fallback. The Authenticate mutation that
+# fetches a fresh token is part of normal authentication, not
+# something this manifest tries to drift-check.
+#
+# Authenticate mutations and other write-side operations are
+# deliberately absent from the manifest itself.
+#
+# Operators with private overrides (e.g. additional endpoints they
+# probe for their own debugging) should put those in
+# manifest.local.toml, which stays gitignored.
+
+base_url    = "https://app.famly.co"
+auth_header = "x-famly-accesstoken"
+auth_env    = "FAMLY_ACCESS_TOKEN"
+user_agent  = "pascha-drift/0.2.0 (+https://github.com/saidtezel/pascha)"
+delay_sec   = 1.0
+
+[[endpoint]]
+id     = "me"
+method = "GET"
+path   = "/api/me/me/me"
+
+[[endpoint]]
+id     = "feed-page1"
+method = "GET"
+path   = "/api/feed/feed/feed?first=10"

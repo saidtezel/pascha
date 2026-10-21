@@ -1,0 +1,80 @@
+<svg viewBox="0 0 1200 430" width="1200" height="430" font-family="IBM Plex Sans, Helvetica, Arial, sans-serif" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="pascha hero: personal photo archive for Famly-using households.">
+  <rect x="0" y="0" width="1200" height="430" fill="#f4f4f4"/>
+  <g font-family="IBM Plex Sans, Helvetica, Arial, sans-serif">
+
+  <!-- top metadata row: y 0-48 -->
+  <text x="60" y="34" font-size="10" font-weight="600" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="1.4">PASCHA · PERSONAL PHOTO ARCHIVE FOR FAMLY-USING HOUSEHOLDS</text>
+  <text x="1140" y="34" text-anchor="end" font-size="10" font-weight="600" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="1.4">2026</text>
+  <line x1="60" y1="48" x2="1140" y2="48" stroke="#e0e0e0" stroke-width="1"/>
+
+  <!-- title block: y 60-200, left -->
+  <text x="60" y="138" font-size="72" font-weight="700" fill="#4a6741" letter-spacing="-2">pascha</text>
+  <text x="60" y="172" font-size="14" fill="#404040">photos and videos from your kid's daycare, kept in your Immich</text>
+  <text x="60" y="192" font-size="14" fill="#404040">in a form that outlives the vendor.</text>
+
+  <!-- italic tagline -->
+  <text x="60" y="222" font-size="12" font-style="italic" fill="#404040">collected moments of early learning.</text>
+
+  <!-- metaphor mark: y 230-380. Open photo album spread; each page
+       holds photographs above their captions (the embedded EXIF/
+       XMP). Page-stack on the right edge suggests depth — the
+       album fills out over the daycare year. Two rows of photos
+       per page (the album isn't full yet). -->
+  <g transform="translate(170 240) scale(2)" stroke="#4a6741" fill="none" stroke-linecap="round">
+    <!-- page-stack depth indicator on the right edge -->
+    <line x1="128" y1="12" x2="132" y2="12" stroke-width="1"/>
+    <line x1="128" y1="20" x2="132" y2="20" stroke-width="1"/>
+    <!-- album outline (4-snapped) -->
+    <rect x="4" y="4" width="128" height="64" stroke-width="2"/>
+    <!-- centre binding -->
+    <line x1="68" y1="4" x2="68" y2="68" stroke-width="1.5"/>
+    <!-- left page: two photos, one caption line each -->
+    <rect x="12" y="12" width="20" height="16" stroke-width="1"/>
+    <line x1="36" y1="20" x2="60" y2="20" stroke-width="1"/>
+    <rect x="12" y="36" width="20" height="16" stroke-width="1"/>
+    <line x1="36" y1="44" x2="60" y2="44" stroke-width="1"/>
+    <!-- right page: same shape, mirrored -->
+    <rect x="76" y="12" width="20" height="16" stroke-width="1"/>
+    <line x1="100" y1="20" x2="124" y2="20" stroke-width="1"/>
+    <rect x="76" y="36" width="20" height="16" stroke-width="1"/>
+    <line x1="100" y1="44" x2="124" y2="44" stroke-width="1"/>
+  </g>
+
+  <!-- column headers: y 60-90, right -->
+  <text x="560" y="72" font-size="10" font-weight="700" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="1.4">FLOW</text>
+  <text x="850" y="72" font-size="10" font-weight="700" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="1.4">DISCIPLINE</text>
+
+  <!-- tile 1: top-left (FLOW · IN) -->
+  <rect x="560" y="84" width="270" height="130" rx="3" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="578" y="106" font-size="10" font-weight="700" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="1.4">IN</text>
+  <text x="578" y="152" font-size="34" font-weight="700" fill="#4a6741" letter-spacing="-0.5">feed pages</text>
+  <text x="578" y="178" font-size="11" fill="#404040">Famly's parent-side GraphQL surface, walked</text>
+  <text x="578" y="200" font-size="9" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="0.6">GRAPHQL · TYPED · INTROSPECTED</text>
+
+  <!-- tile 2: top-right (DISCIPLINE · POSTURE) -->
+  <rect x="850" y="84" width="270" height="130" rx="3" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="868" y="106" font-size="10" font-weight="700" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="1.4">POSTURE</text>
+  <text x="868" y="152" font-size="34" font-weight="700" fill="#4a6741" letter-spacing="-0.5">personal</text>
+  <text x="868" y="178" font-size="11" fill="#404040">a single household, no aggregation, no telemetry</text>
+  <text x="868" y="200" font-size="9" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="0.6">ONE HOUSEHOLD · RATE-LIMITED</text>
+
+  <!-- tile 3: bottom-left (FLOW · OUT) -->
+  <rect x="560" y="224" width="270" height="130" rx="3" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="578" y="246" font-size="10" font-weight="700" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="1.4">OUT</text>
+  <text x="578" y="292" font-size="34" font-weight="700" fill="#4a6741" letter-spacing="-0.5">files</text>
+  <text x="578" y="318" font-size="11" fill="#404040">JPEG and MP4 with EXIF/XMP, in Immich</text>
+  <text x="578" y="340" font-size="9" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="0.6">IMMICH ONLY · NO LOCAL COPY</text>
+
+  <!-- tile 4: bottom-right (DISCIPLINE · LIFETIME) -->
+  <rect x="850" y="224" width="270" height="130" rx="3" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="868" y="246" font-size="10" font-weight="700" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="1.4">LIFETIME</text>
+  <text x="868" y="292" font-size="34" font-weight="700" fill="#4a6741" letter-spacing="-0.5">archival</text>
+  <text x="868" y="318" font-size="11" fill="#404040">the file is the artifact, not a handle to a service</text>
+  <text x="868" y="340" font-size="9" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="0.6">EXIF/XMP · OPEN FORMAT · ANY YEAR</text>
+
+  <!-- bottom metadata row -->
+  <line x1="60" y1="386" x2="1140" y2="386" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="60" y="412" font-size="10" font-weight="600" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="1.4">GO · CLI · GRAPHQL · EXIF/XMP · IMMICH</text>
+  <text x="1140" y="412" text-anchor="end" font-size="10" font-weight="600" font-family="IBM Plex Mono, Menlo, monospace" fill="#707070" letter-spacing="1.4">MIT · GITHUB.COM/SAIDTEZEL/PASCHA</text>
+  </g>
+</svg>

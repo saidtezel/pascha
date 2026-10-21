@@ -1,0 +1,20 @@
+---
+import '../styles/global.css';
+import ProjectLayout from '@dunn.dev/reference/chrome/ProjectLayout.astro';
+import markSvg from '../mark.svg?raw';
+
+interface Props {
+  description?: string;
+}
+---
+<ProjectLayout
+  {...Astro.props}
+  siteName="pascha.dunn.dev"
+  tagline="collected moments of early learning"
+  mark={markSvg}
+  nav={[{ href: 'https://github.com/saidtezel/pascha/releases', label: 'Releases' }]}
+  repoUrl="https://github.com/saidtezel/pascha"
+  repoLabel="github.com/saidtezel/pascha"
+>
+  <slot />
+</ProjectLayout>

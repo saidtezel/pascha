@@ -1,0 +1,43 @@
+# Build outputs
+/bin/
+/dist/
+*.test
+*.out
+coverage.txt
+
+# pascha.dunn.dev site build artifacts (web/ is an Astro project)
+/web/node_modules/
+/web/dist/
+/web/.astro/
+
+# Local config: never commit credentials
+/config.toml
+/*.env
+.envrc
+
+# Discovery artifacts: never commit captured payloads, schema dumps,
+# session walks, or shape baselines beyond pascha's own integration
+# boundary. The "main" baseline subdirectory and the canonical
+# manifest.toml are exceptions, committed as documentation of what
+# pascha integrates against (see discovery/PROTOCOL.md for the
+# project-specific exception).
+/discovery/baselines/*
+!/discovery/baselines/main/
+/discovery/sessions/
+/discovery/captures/
+/discovery/probe/*.json
+/discovery/probe/*.shape
+/discovery/probe/*.har
+/discovery/probe/manifest.local.toml
+
+# Runtime state
+/state.db
+*.sqlite
+*.sqlite3
+
+# Tempfiles and editor cruft
+/tmp/
+.idea/
+.vscode/
+*.swp
+.DS_Store

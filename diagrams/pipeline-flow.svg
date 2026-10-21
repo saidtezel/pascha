@@ -1,0 +1,85 @@
+<svg viewBox="0 0 1200 460" width="1200" height="460" font-family="Helvetica, Arial, sans-serif" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="pascha pipeline flow: per-feed-page, paginate the feed, then for each asset ask Immich whether it already holds the Famly id; for the rest, fetch the highest-resolution variant from the CDN to a temp file, embed EXIF and XMP metadata in-file, upload to Immich, and remove the temp file. No local state.">
+  <defs>
+    <marker id="p-arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,3.5 L0,7 z" fill="#909090"/>
+    </marker>
+    <marker id="p-arrow-accent" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,3.5 L0,7 z" fill="#4a6741"/>
+    </marker>
+  </defs>
+  <g font-family="Helvetica, Arial, sans-serif">
+
+  <text x="20" y="32" font-size="22" font-weight="700" fill="#4a6741">pipeline flow</text>
+  <text x="20" y="54" font-size="12" fill="#404040">per fetch run: paginate feed; per asset, ask Immich, then transition through four typestate phases.</text>
+
+  <text x="600" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="#909090">FEED LOOP</text>
+  <rect x="60" y="105" width="220" height="60" rx="4" fill="none" stroke="#0a0a0a" stroke-width="1.5"/>
+  <text x="170" y="128" text-anchor="middle" font-size="11" font-weight="600" fill="#0a0a0a">GET feed endpoint</text>
+  <text x="170" y="146" text-anchor="middle" font-size="9" fill="#909090">cursor + olderThan from last item</text>
+
+  <line x1="280" y1="135" x2="340" y2="135" stroke="#909090" stroke-width="1.5" marker-end="url(#p-arrow)"/>
+  <text x="310" y="125" text-anchor="middle" font-size="9" fill="#909090">page</text>
+
+  <rect x="340" y="105" width="160" height="60" rx="4" fill="none" stroke="#0a0a0a" stroke-width="1.5"/>
+  <text x="420" y="128" text-anchor="middle" font-size="11" font-weight="600" fill="#0a0a0a">filter source</text>
+  <text x="420" y="146" text-anchor="middle" font-size="9" fill="#909090">feed-all / tagged / liked</text>
+
+  <line x1="500" y1="135" x2="560" y2="135" stroke="#909090" stroke-width="1.5" marker-end="url(#p-arrow)"/>
+
+  <rect x="560" y="105" width="220" height="60" rx="4" fill="none" stroke="#0a0a0a" stroke-width="1.5"/>
+  <text x="670" y="128" text-anchor="middle" font-size="11" font-weight="600" fill="#0a0a0a">already in Immich?</text>
+  <text x="670" y="146" text-anchor="middle" font-size="9" fill="#909090">search by Famly id in file name</text>
+
+  <line x1="780" y1="135" x2="840" y2="135" stroke="#4a6741" stroke-width="1.5" marker-end="url(#p-arrow-accent)"/>
+  <text x="810" y="125" text-anchor="middle" font-size="9" fill="#4a6741" font-weight="700">no</text>
+
+  <rect x="840" y="105" width="180" height="60" rx="4" fill="none" stroke="#4a6741" stroke-width="1.5"/>
+  <text x="930" y="128" text-anchor="middle" font-size="11" font-weight="600" fill="#0a0a0a">enter pipeline</text>
+  <text x="930" y="146" text-anchor="middle" font-size="9" fill="#4a6741">4 typestate phases</text>
+
+  <line x1="670" y1="165" x2="670" y2="200" stroke="#909090" stroke-width="1.5" marker-end="url(#p-arrow)"/>
+  <text x="690" y="184" font-size="9" fill="#909090">yes &#8594; skip, advance</text>
+
+  <text x="600" y="240" text-anchor="middle" font-size="11" font-weight="700" fill="#4a6741">PER-ASSET PIPELINE (typestate; no phase may be skipped)</text>
+
+  <rect x="20" y="260" width="265" height="80" rx="3" fill="none" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="30" y="280" font-size="11" font-weight="700" fill="#4a6741">1</text>
+  <text x="46" y="280" font-size="11" font-weight="600" fill="#0a0a0a">Discovered</text>
+  <text x="30" y="298" font-size="10" fill="#404040">image id, signed CDN url,</text>
+  <text x="30" y="312" font-size="10" fill="#404040">filename hint, sender,</text>
+  <text x="30" y="326" font-size="10" fill="#404040">timestamps, subject tags</text>
+
+  <line x1="285" y1="300" x2="315" y2="300" stroke="#4a6741" stroke-width="1.5" marker-end="url(#p-arrow-accent)"/>
+
+  <rect x="315" y="260" width="265" height="80" rx="3" fill="none" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="325" y="280" font-size="11" font-weight="700" fill="#4a6741">2</text>
+  <text x="341" y="280" font-size="11" font-weight="600" fill="#0a0a0a">Downloaded</text>
+  <text x="325" y="298" font-size="10" fill="#404040">stream to temp file (0600),</text>
+  <text x="325" y="312" font-size="10" fill="#404040">SHA1 during copy, capture</text>
+  <text x="325" y="326" font-size="10" fill="#404040">Content-Type for ext sniff</text>
+
+  <line x1="580" y1="300" x2="610" y2="300" stroke="#4a6741" stroke-width="1.5" marker-end="url(#p-arrow-accent)"/>
+
+  <rect x="610" y="260" width="265" height="80" rx="3" fill="none" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="620" y="280" font-size="11" font-weight="700" fill="#4a6741">3</text>
+  <text x="636" y="280" font-size="11" font-weight="600" fill="#0a0a0a">Prepared</text>
+  <text x="620" y="298" font-size="10" fill="#404040">embed EXIF + XMP into the</text>
+  <text x="620" y="312" font-size="10" fill="#404040">temp file; build video</text>
+  <text x="620" y="326" font-size="10" fill="#404040">XMP sidecar</text>
+
+  <line x1="875" y1="300" x2="905" y2="300" stroke="#4a6741" stroke-width="1.5" marker-end="url(#p-arrow-accent)"/>
+
+  <rect x="905" y="260" width="265" height="80" rx="3" fill="#f4f7f3" stroke="#4a6741" stroke-width="1.5"/>
+  <text x="915" y="280" font-size="11" font-weight="700" fill="#4a6741">4</text>
+  <text x="931" y="280" font-size="11" font-weight="600" fill="#0a0a0a">Uploaded</text>
+  <text x="915" y="298" font-size="10" fill="#404040">POST /api/assets named by</text>
+  <text x="915" y="312" font-size="10" fill="#404040">pattern (carries the id) +</text>
+  <text x="915" y="326" font-size="10" fill="#404040">checksum; temp file removed</text>
+
+  <text x="600" y="380" text-anchor="middle" font-size="10" fill="#909090">no state file: an asset is done when Immich holds it; anything that failed is missing there, so the next run picks it up.</text>
+
+  <line x1="20" y1="430" x2="1180" y2="430" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="20" y="448" font-size="10" fill="#909090">Discovered → Downloaded → Prepared → Uploaded · transitions are methods on each phase type</text>
+  <text x="1180" y="448" font-size="10" fill="#909090" text-anchor="end">internal/asset/transitions.go</text>
+  </g>
+</svg>

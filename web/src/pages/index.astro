@@ -1,0 +1,246 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '@dunn.dev/reference/chrome/Hero.astro';
+import SectionLabel from '@dunn.dev/reference/chrome/SectionLabel.astro';
+---
+<Layout description="A personal photo archive for Famly-using households. pascha pulls your kid's photos and videos from the nursery feed into your own Immich library with the post body, the educator's name, and the date embedded into each file via EXIF and XMP — so your child's history doesn't depend on Famly continuing to exist as a company.">
+  <Hero title="pascha" eyebrow="photo archive · cli">
+    <p>
+      Photos and videos from your kid's daycare, kept in
+      <em>your</em> Immich, in a form that outlives the vendor.
+    </p>
+    <Fragment slot="actions">
+      <a class="cta-primary" href="https://github.com/saidtezel/pascha">Read on GitHub →</a>
+      <a class="cta-secondary" href="https://github.com/saidtezel/pascha/releases">Releases</a>
+    </Fragment>
+  </Hero>
+
+  <section class="section">
+    <SectionLabel label="What this is" />
+    <p class="section-prose">
+      Your daycare uses Famly. Every week the educators post a stream
+      of photos and short videos of your kid: lunch, the sand pit, a
+      collage they made on Wednesday, the moment they tried a new
+      word. Famly is built for the in-the-moment surfacing of that
+      stream. It is not built to be a long-term archive of your
+      child's first years.
+    </p>
+    <p class="section-prose">
+      <code>pascha</code> is a single Go binary that you run on your
+      own machine, against your own household, with your own login.
+      It pulls every photo and video the educators have posted,
+      uploads them to your own Immich server, and embeds the caption, the educator's name, the kid tags, and the
+      date into each file's own EXIF and XMP metadata. Any photo
+      viewer or future archival workflow can read those fields —
+      today, and in twenty years.
+    </p>
+  </section>
+
+  <section class="section">
+    <SectionLabel label="The vendor survives" />
+    <p class="section-prose">
+      The reason this matters is that an in-app feed is a handle to
+      a service, not an artifact. When the company changes its mind
+      about retention, sells to a different parent, deprecates the
+      mobile app, or simply goes away, what you remember of your
+      child's first three years of childcare goes with it.
+    </p>
+    <figure class="diagram">
+      <svg viewBox="0 0 720 280" role="img" aria-label="Three stages in a horizontal flow: Famly's nursery feed on the left, the pascha binary in the middle, and your Immich library on the right. Three disruption events (outages, account closures, API changes) originate at Famly and terminate at a barrier between pascha and the disk, never reaching the archive.">
+  <rect fill="none" stroke="var(--text-muted)" stroke-width="1" x="60" y="80" width="140" height="80" rx="4"/>
+  <text font-family="'IBM Plex Mono', Menlo, monospace" font-size="14" font-weight="700" letter-spacing="0.06em" fill="var(--text-muted)" x="132" y="108" text-anchor="middle">FAMLY</text>
+  <text font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" fill="var(--text-2)" x="132" y="128" text-anchor="middle">nursery feed</text>
+  <text font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" fill="var(--text-2)" x="132" y="144" text-anchor="middle">photos, captions</text>
+  <line fill="none" stroke="var(--accent)" stroke-width="1.5" x1="200" y1="120" x2="288" y2="120"/>
+  <polygon fill="var(--accent)" points="288,120 280,116 280,124"/>
+  <text font-family="'IBM Plex Mono', Menlo, monospace" font-size="11" letter-spacing="0.04em" fill="var(--text-muted)" x="244" y="112" text-anchor="middle">PULL</text>
+  <rect fill="none" stroke="var(--accent)" stroke-width="2" x="288" y="80" width="140" height="80" rx="4"/>
+  <text font-family="'IBM Plex Mono', Menlo, monospace" font-size="14" font-weight="700" letter-spacing="0.06em" fill="var(--accent)" x="360" y="108" text-anchor="middle">PASCHA</text>
+  <text font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" fill="var(--text-2)" x="360" y="128" text-anchor="middle">one binary</text>
+  <text font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" fill="var(--text-2)" x="360" y="144" text-anchor="middle">your machine</text>
+  <line fill="none" stroke="var(--accent)" stroke-width="1.5" x1="428" y1="120" x2="516" y2="120"/>
+  <polygon fill="var(--accent)" points="516,120 508,116 508,124"/>
+  <text font-family="'IBM Plex Mono', Menlo, monospace" font-size="11" letter-spacing="0.04em" fill="var(--text-muted)" x="472" y="112" text-anchor="middle">UPLOAD</text>
+  <rect fill="none" stroke="var(--text-muted)" stroke-width="1" x="516" y="80" width="140" height="80" rx="4"/>
+  <text font-family="'IBM Plex Mono', Menlo, monospace" font-size="14" font-weight="700" letter-spacing="0.06em" fill="var(--text-muted)" x="588" y="108" text-anchor="middle">YOUR IMMICH</text>
+  <text font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" fill="var(--text-2)" x="588" y="128" text-anchor="middle">self-hosted library</text>
+  <text font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" fill="var(--text-2)" x="588" y="144" text-anchor="middle">EXIF · XMP embedded</text>
+  <line fill="none" stroke="var(--danger)" stroke-width="2" x1="472" y1="174" x2="472" y2="268"/>
+  <text font-family="'IBM Plex Mono', Menlo, monospace" font-size="10" font-weight="600" letter-spacing="0.08em" fill="var(--danger)" x="484" y="252" text-anchor="start">VENDOR</text>
+  <text font-family="'IBM Plex Mono', Menlo, monospace" font-size="10" font-weight="600" letter-spacing="0.08em" fill="var(--danger)" x="484" y="266" text-anchor="start">SURVIVES</text>
+  <path fill="none" stroke="var(--danger)" stroke-width="1.25" stroke-dasharray="4 3" d="M132,160 L330,190 H464"/>
+  <polygon fill="var(--danger)" points="472,190 464,186 464,194"/>
+  <text font-family="'IBM Plex Mono', Menlo, monospace" font-size="11" letter-spacing="0.04em" fill="var(--text-muted)" x="338" y="184" text-anchor="start">OUTAGES</text>
+  <path fill="none" stroke="var(--danger)" stroke-width="1.25" stroke-dasharray="4 3" d="M132,160 L290,214 H464"/>
+  <polygon fill="var(--danger)" points="472,214 464,210 464,218"/>
+  <text font-family="'IBM Plex Mono', Menlo, monospace" font-size="11" letter-spacing="0.04em" fill="var(--text-muted)" x="298" y="208" text-anchor="start">ACCOUNT CLOSURES</text>
+  <path fill="none" stroke="var(--danger)" stroke-width="1.25" stroke-dasharray="4 3" d="M132,160 L250,238 H464"/>
+  <polygon fill="var(--danger)" points="472,238 464,234 464,242"/>
+  <text font-family="'IBM Plex Mono', Menlo, monospace" font-size="11" letter-spacing="0.04em" fill="var(--text-muted)" x="258" y="232" text-anchor="start">API CHANGES</text>
+      </svg>
+      <p class="diagram-caption">disruption stops at the Immich boundary</p>
+    </figure>
+    <p class="section-prose">
+      Once the bytes are in your Immich with metadata embedded, none
+      of those vendor outcomes touches the history. The file is the
+      artifact, not a handle to a service.
+    </p>
+  </section>
+
+  <section class="section">
+    <SectionLabel label="How pascha is shaped" />
+    <div class="tile-grid">
+      <div class="tile">
+        <p class="tile-eyebrow">flow · in</p>
+        <p class="tile-headline">feed pages</p>
+        <p class="tile-prose">
+          Famly's parent-side GraphQL surface, walked one page at a
+          time at the rate a single human user would naturally
+          generate. Schema introspected from the live endpoint, types
+          codegen'd, response shapes pinned by a drift baseline.
+        </p>
+        <p class="tile-meta">graphql · typed · introspected</p>
+      </div>
+      <div class="tile">
+        <p class="tile-eyebrow">discipline · posture</p>
+        <p class="tile-headline">personal</p>
+        <p class="tile-prose">
+          One household, one operator, one set of credentials. No
+          aggregation across families, no telemetry, no shared
+          identifiers, no third-party calls. The binary doesn't know
+          there is more than one of you.
+        </p>
+        <p class="tile-meta">one household · rate-limited</p>
+      </div>
+      <div class="tile">
+        <p class="tile-eyebrow">flow · out</p>
+        <p class="tile-headline">files</p>
+        <p class="tile-prose">
+          JPEG and MP4 uploaded straight to your Immich server, with
+          the caption, the educator's name, the kid tags, and the
+          date embedded as EXIF and XMP. Nothing is kept on the
+          machine running pascha; Immich is the archive.
+        </p>
+        <p class="tile-meta">immich only · no local copy</p>
+      </div>
+      <div class="tile">
+        <p class="tile-eyebrow">discipline · lifetime</p>
+        <p class="tile-headline">archival</p>
+        <p class="tile-prose">
+          The file is the artifact, not a handle to a service. Open
+          formats, standard metadata, no proprietary container.
+          Readable in any year by any tool that has ever read a JPEG.
+        </p>
+        <p class="tile-meta">exif/xmp · open format · any year</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <SectionLabel label="Why Famly" />
+    <p class="section-prose">
+      Vendors fall along a spectrum when an outside party builds
+      against their surface. The <em>hostile</em> ones forbid access
+      in their terms and chase violations. The <em>silent</em> ones
+      forbid access but ignore violations and tolerate the drift. A
+      third group — the <em>engaged</em> ones — restricts usage in
+      their terms, acknowledges the use case in support interactions,
+      and points users toward self-service solutions. Famly is in
+      that third group, and that's what makes <code>pascha</code>
+      possible: the surface is inspectable, the schema is
+      introspectable, and the vendor's response when asked about
+      export was to decline gracefully and point at the surface they
+      already publish.
+    </p>
+    <p class="section-prose">
+      This isn't a license — it's reputational, and the reciprocal
+      obligation is to stay careful: one household, one operator, the
+      rate a human generates, no aggregation, no resale, no agent
+      farm. See <a href="https://andrew.dunn.dev/writing/progressive-vendor-stance/">a
+      progressive vendor stance for the agent-native future</a> for
+      the longer argument.
+    </p>
+  </section>
+
+  <section class="section">
+    <SectionLabel label="Install" />
+    <p class="section-prose">
+      Three ways to run <code>pascha</code>, in increasing order of
+      isolation from your day-to-day machine. Each release ships
+      cosign-signed binaries, a CycloneDX SBOM per architecture, and
+      a SLSA v1.0 provenance attestation, all verifiable against
+      GitLab's OIDC issuer.
+    </p>
+    <div class="tile-grid">
+      <div class="tile">
+        <p class="tile-eyebrow">option a</p>
+        <h3 class="tile-headline">Go install</h3>
+        <pre>go install github.com/saidtezel/pascha/cmd/pascha@latest</pre>
+        <p class="tile-prose">
+          Build from source against your local Go toolchain. Best
+          for contributors and anyone who already runs Go for other
+          work. No signature verification — trust comes from the
+          module proxy.
+        </p>
+        <p class="tile-meta">go 1.25+ · module-cached</p>
+      </div>
+      <div class="tile">
+        <p class="tile-eyebrow">option b</p>
+        <h3 class="tile-headline">Prebuilt binary</h3>
+        <pre>curl -L -o pascha https://github.com/saidtezel/pascha/releases/latest/download/pascha-linux-amd64</pre>
+        <p class="tile-prose">
+          Cosign-signed binary from the <a href="https://github.com/saidtezel/pascha/releases">releases page</a>.
+          Pair the download with the matching <code>.sig</code> and
+          verify against the GitLab OIDC issuer before running. The
+          hardened option that doesn't ask you to install a Go
+          toolchain.
+        </p>
+        <p class="tile-meta">linux/amd64 · linux/arm64 · darwin/arm64 · cosign</p>
+      </div>
+      <div class="tile">
+        <p class="tile-eyebrow">option c</p>
+        <h3 class="tile-headline">Container image</h3>
+        <pre>podman pull registry.gitlab.com/dunn.dev/pascha/cli:latest</pre>
+        <p class="tile-prose">
+          The OCI image is the prebuilt binary copied into a thin
+          runtime layer — same cosign-signed artifact as option B,
+          byte-for-byte. Best for cron on a homelab box where you
+          don't want Go or a loose binary on disk. The image itself
+          is cosign-signed by digest. No volume needed: pascha keeps no
+          state. Pass the Immich URL and API key as env vars at
+          run-time.
+        </p>
+        <p class="tile-meta">oci · cosign-signed-by-digest · rootless-ok</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <SectionLabel label="Who this is for" />
+    <p class="section-prose">
+      A parent, co-parent, or household admin whose kid's daycare
+      uses Famly, runs Immich, and wants a permanent copy of every
+      photo and video the educators post, with metadata that survives any
+      future tooling change.
+    </p>
+    <p class="section-prose">
+      If your school doesn't use Famly, or if you're happy enough
+      with how the mobile app surfaces history, <code>pascha</code>
+      is not for you. It's also not multi-tenant — one binary, one
+      household, one Immich.
+    </p>
+  </section>
+
+  <section class="section">
+    <SectionLabel label="What this isn't" />
+    <p class="section-prose">
+      Not a privacy gateway. Every piece of context the vendor
+      exposes lands inside the file you keep — that's the whole
+      point of EXIF and XMP for archival. What happens to those
+      files after you have them is your call. Not a scraping service
+      either: one operator, the rate of one human, written to feel
+      like a parent backing up their own photos because that's what
+      it is.
+    </p>
+  </section>
+</Layout>

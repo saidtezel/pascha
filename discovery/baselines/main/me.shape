@@ -1,0 +1,12 @@
+{
+  "email": "str",
+  "loginId": "str",
+  "roles2": [
+    {
+      "targetId": "str",
+      "targetType": "str",
+      "title": "str"
+    },
+    "\u003cn=*\u003e"
+  ]
+}
